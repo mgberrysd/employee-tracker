@@ -1,20 +1,27 @@
-DROP DATABASE IF EXISTS grocery_db;
-CREATE DATABASE grocery_db;
+DROP DATABASE IF EXISTS employee_db;
+CREATE DATABASE employee_db;
 
-USE grocery_db;
+USE employee_db;
 
-CREATE TABLE customers (
-  id INT NOT NULL,
-  first_name VARCHAR(30),
-  last_name VARCHAR(30),
-  PRIMARY KEY (id)
+CREATE TABLE department (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(30) NOT NULL
 );
 
-CREATE TABLE customer_order (
-  id INT,
-  customer_id INT,
-  order_details TEXT,
-  FOREIGN KEY (customer_id)
-  REFERENCES customers(id)
-  ON DELETE SET NULL
+CREATE TABLE role (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(30) NOT NULL,
+  salary DECIMAL NOT NULL,
+  department_id INT NOT NULL FOREIGN KEY
+  REFERENCES department(id)
+);
+
+CREATE TABLE employee (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  first_name VARCHAR(30) NOT NULL,
+  last_name VARCHAR(30) NOT NULL,
+  role_id INT NOT NULL FOREIGN KEY
+  REFERENCES role(id),
+  manager_id INT NOT NULL FOREIGN KEY
+  REFERENCES employee(id)
 );
