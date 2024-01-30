@@ -12,7 +12,7 @@ const db = mysql.createConnection(
   console.log(`Connected to the employee_db database.`)
 );
 
-inquirer
+ const inqPrompt = () => {inquirer
   .prompt([
     {
       type: 'list',
@@ -30,7 +30,8 @@ inquirer
             console.error({ error: err.message });
              return;
           }
-            console.log(rows)
+          inqPrompt();
+          console.log(rows)
         });
     }
 
@@ -42,6 +43,7 @@ inquirer
             console.error({ error: err.message });
              return;
           }
+          inqPrompt();
           console.log(rows)
         });
     }
@@ -54,6 +56,7 @@ inquirer
             console.error({ error: err.message });
              return;
           }
+          inqPrompt();
           console.log(rows)
         });
     }
@@ -68,7 +71,18 @@ inquirer
                 }
             ])
             .then((data) => {
-
+                const sql = `INSERT INTO department (name)
+                VALUES (?)`;
+                
+                const params = [data.addDepartment];
+                db.query(sql, params, (err, rows) => {
+                  if (err) {
+                    console.error({ error: err.message });
+                     return;
+                  }
+                  inqPrompt();
+                  console.log(rows)
+                });
             });
     }
 
@@ -77,12 +91,33 @@ inquirer
             .prompt([
                 {
                     type: 'input', 
-                    name: 'addDepartment',
-                    message: 'What is the name of the department you wish to add?',
-                }
+                    name: 'addRoleTitle',
+                    message: 'What is the title of the role you wish to add?',
+                },
+                {
+                    type: 'input', 
+                    name: 'addRoleSalary',
+                    message: 'What is the salary of the role you wish to add?',
+                },
+                {
+                    type: 'input', 
+                    name: 'addRoleDepID',
+                    message: 'What is the department ID of the role you wish to add?',
+                },
             ])
             .then((data) => {
-
+                const sql = `INSERT INTO role (title, salary, department_id)
+                VALUES (?, ?, ?)`;
+                
+                const params = [data.addRoleTitle, data.addRoleSalary, data.addRoleDepID];
+                db.query(sql, params, (err, rows) => {
+                  if (err) {
+                    console.error({ error: err.message });
+                     return;
+                  }
+                  inqPrompt();
+                  console.log(rows)
+                });
             });
     }
 
@@ -91,12 +126,38 @@ inquirer
             .prompt([
                 {
                     type: 'input', 
-                    name: 'addDepartment',
-                    message: 'What is the name of the department you wish to add?',
-                }
+                    name: 'addFirstName',
+                    message: 'What is the first name of the employee you wish to add?',
+                },
+                {
+                    type: 'input', 
+                    name: 'addLastName',
+                    message: 'What is the last name of the employee you wish to add?',
+                },
+                {
+                    type: 'input', 
+                    name: 'addRoleID',
+                    message: 'What is the role ID of the employee you wish to add?',
+                },
+                {
+                    type: 'input', 
+                    name: 'addManagerID',
+                    message: 'What is the manager employee ID of the employee you wish to add? (enter null if no manager)',
+                },
             ])
             .then((data) => {
-
+                const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id)
+                VALUES (?, ?, ?, ?)`;
+                
+                const params = [data.addFirstName, data.addLastName, data.addRoleID, JSON.parse(data.addManagerID)];
+                db.query(sql, params, (err, rows) => {
+                  if (err) {
+                    console.error({ error: err.message });
+                     return;
+                  }
+                  inqPrompt();
+                  console.log(rows)
+                });
             });
     }
 
@@ -104,9 +165,9 @@ inquirer
 
     }
 
-  });
+  })};
 
-
+inqPrompt();
 // Create a movie
 // app.post('/api/new-movie', ({ body }, res) => {
 //   const sql = `INSERT INTO movies (movie_name)
