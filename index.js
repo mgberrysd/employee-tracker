@@ -1,17 +1,15 @@
-// Import and require mysql2
+const inquirer = require('inquirer')
 const mysql = require('mysql2');
 
 // Connect to database
 const db = mysql.createConnection(
   {
     host: 'localhost',
-    // MySQL username,
     user: 'root',
-    // TODO: Add MySQL password here
-    password: 'password',
-    database: 'movies_db'
+    password: 'password12345',
+    database: 'employee_db'
   },
-  console.log(`Connected to the movies_db database.`)
+  console.log(`Connected to the employee_db database.`)
 );
 
 // Create a movie
