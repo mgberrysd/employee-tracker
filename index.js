@@ -12,6 +12,66 @@ const db = mysql.createConnection(
   console.log(`Connected to the employee_db database.`)
 );
 
+inquirer
+  .prompt([
+
+    {
+      type: 'list',
+      name: 'top',
+      message: 'What would you like to do?',
+      choices: ['View all departments', 'View all roles', 'View all employees', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee role']
+    },
+  ])
+  .then((data) => {
+    if (data === 'View all departments') {
+        const sql = `SELECT * FROM department`;
+  
+        db.query(sql, (err, rows) => {
+          if (err) {
+            res.json({ error: err.message });
+             return;
+          }
+          res.json({
+            message: 'success',
+            data: rows
+          });
+        });
+    }
+
+    if (data === 'View all roles') {
+        const sql = `SELECT * FROM role`;
+  
+        db.query(sql, (err, rows) => {
+          if (err) {
+            res.json({ error: err.message });
+             return;
+          }
+          res.json({
+            message: 'success',
+            data: rows
+          });
+        });
+    }
+
+    if (data === 'View all employees') {
+        const sql = `SELECT * FROM employee`;
+  
+        db.query(sql, (err, rows) => {
+          if (err) {
+            res.json({ error: err.message });
+             return;
+          }
+          res.json({
+            message: 'success',
+            data: rows
+          });
+        });
+    }
+
+    
+  });
+
+
 // Create a movie
 app.post('/api/new-movie', ({ body }, res) => {
   const sql = `INSERT INTO movies (movie_name)
