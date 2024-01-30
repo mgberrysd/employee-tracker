@@ -35,7 +35,8 @@ const db = mysql.createConnection(
     }
 
     if (data.top === 'View all roles') {
-        const sql = `SELECT * FROM role`;
+        const sql = `SELECT role.title, role.id AS role_id, department.name AS department, role.salary FROM role
+        JOIN department ON department.id = role.department_id`;
         db.query(sql, (err, rows) => {
           if (err) {
             console.error({ error: err.message });
@@ -47,7 +48,11 @@ const db = mysql.createConnection(
     }
 
     if (data.top === 'View all employees') {
-        const sql = `SELECT * FROM employee`;
+        const sql = `SELECT A.id AS employee_id, A.first_name, A.last_name, role.title, department.name AS department, role.salary, A.manager_id AS manager, CONCAT_WS(" ", B.first_name, B.last_name) AS manager
+        FROM (((employee A 
+        JOIN employee B ON A.manager_id = B.id)
+        JOIN role ON A.role_id = role.id)
+        JOIN department ON department.id = role.department_id)`;
         db.query(sql, (err, rows) => {
           if (err) {
             console.error({ error: err.message });
