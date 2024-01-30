@@ -18,13 +18,12 @@ const db = mysql.createConnection(
       type: 'list',
       name: 'top',
       message: 'What would you like to do?',
-      choices: ['View all departments', 'View all roles', 'View all employees', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee role']
+      choices: ['View all departments', 'View all roles', 'View all employees', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee role', 'Quit']
     },
   ])
   .then((data) => {
     if (data.top === 'View all departments') {
         const sql = `SELECT * FROM department`;
-  
         db.query(sql, (err, rows) => {
           if (err) {
             console.error({ error: err.message });
@@ -37,7 +36,6 @@ const db = mysql.createConnection(
 
     if (data.top === 'View all roles') {
         const sql = `SELECT * FROM role`;
-  
         db.query(sql, (err, rows) => {
           if (err) {
             console.error({ error: err.message });
@@ -50,7 +48,6 @@ const db = mysql.createConnection(
 
     if (data.top === 'View all employees') {
         const sql = `SELECT * FROM employee`;
-  
         db.query(sql, (err, rows) => {
           if (err) {
             console.error({ error: err.message });
@@ -73,14 +70,13 @@ const db = mysql.createConnection(
             .then((data) => {
                 const sql = `INSERT INTO department (name)
                 VALUES (?)`;
-                
                 const params = [data.addDepartment];
                 db.query(sql, params, (err, rows) => {
                   if (err) {
                     console.error({ error: err.message });
                      return;
                   }
-                  console.log(rows);
+                  console.log(`Added new department ${data.addDepartment}`);
                   inqPrompt();
                 });
             });
@@ -108,14 +104,13 @@ const db = mysql.createConnection(
             .then((data) => {
                 const sql = `INSERT INTO role (title, salary, department_id)
                 VALUES (?, ?, ?)`;
-                
                 const params = [data.addRoleTitle, data.addRoleSalary, data.addRoleDepID];
                 db.query(sql, params, (err, rows) => {
                   if (err) {
                     console.error({ error: err.message });
                      return;
                   }
-                  console.log(rows);
+                  console.log(`Added new role ${data.addRoleTitle} with a salary of ${data.addRoleSalary} to department ID ${data.addRoleDepID}`);
                   inqPrompt();
                 });
             });
@@ -148,14 +143,13 @@ const db = mysql.createConnection(
             .then((data) => {
                 const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id)
                 VALUES (?, ?, ?, ?)`;
-                
                 const params = [data.addFirstName, data.addLastName, data.addRoleID, JSON.parse(data.addManagerID)];
                 db.query(sql, params, (err, rows) => {
                   if (err) {
                     console.error({ error: err.message });
                      return;
                   }
-                  console.log(rows);
+                  console.log(`Added new employee ${data.addFirstName} ${data.addLastName}`);
                   inqPrompt();
                 });
             });
@@ -177,17 +171,20 @@ const db = mysql.createConnection(
         ])
         .then((data) => {
             const sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
-            
             const params = [data.updateRoleID, data.selectID];
             db.query(sql, params, (err, rows) => {
               if (err) {
                 console.error({ error: err.message });
                  return;
               }
-              console.log(rows);
+              console.log(`Updated employee ${data.selectID} to role ID ${data.updateRoleID}`);
               inqPrompt();
             });
         });
+    }
+
+    if (data.top === 'Quit') {
+        process.exit()
     }
 
   })};
