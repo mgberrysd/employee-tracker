@@ -30,8 +30,8 @@ const db = mysql.createConnection(
             console.error({ error: err.message });
              return;
           }
+          console.log(rows);
           inqPrompt();
-          console.log(rows)
         });
     }
 
@@ -43,8 +43,8 @@ const db = mysql.createConnection(
             console.error({ error: err.message });
              return;
           }
+          console.log(rows);
           inqPrompt();
-          console.log(rows)
         });
     }
 
@@ -56,8 +56,8 @@ const db = mysql.createConnection(
             console.error({ error: err.message });
              return;
           }
+          console.log(rows);
           inqPrompt();
-          console.log(rows)
         });
     }
 
@@ -80,8 +80,8 @@ const db = mysql.createConnection(
                     console.error({ error: err.message });
                      return;
                   }
+                  console.log(rows);
                   inqPrompt();
-                  console.log(rows)
                 });
             });
     }
@@ -115,8 +115,8 @@ const db = mysql.createConnection(
                     console.error({ error: err.message });
                      return;
                   }
+                  console.log(rows);
                   inqPrompt();
-                  console.log(rows)
                 });
             });
     }
@@ -155,108 +155,41 @@ const db = mysql.createConnection(
                     console.error({ error: err.message });
                      return;
                   }
+                  console.log(rows);
                   inqPrompt();
-                  console.log(rows)
                 });
             });
     }
 
     if (data.top === 'Update an employee role') {
-
+        inquirer
+        .prompt([
+            {
+                type: 'input', 
+                name: 'selectID',
+                message: 'What is the ID of the employee you wish to update?',
+            },
+            {
+                type: 'input', 
+                name: 'updateRoleID',
+                message: 'What is the new role ID of the employee you wish to update?',
+            },
+        ])
+        .then((data) => {
+            const sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
+            
+            const params = [data.updateRoleID, data.selectID];
+            db.query(sql, params, (err, rows) => {
+              if (err) {
+                console.error({ error: err.message });
+                 return;
+              }
+              console.log(rows);
+              inqPrompt();
+            });
+        });
     }
 
   })};
 
 inqPrompt();
-// Create a movie
-// app.post('/api/new-movie', ({ body }, res) => {
-//   const sql = `INSERT INTO movies (movie_name)
-//     VALUES (?)`;
-//   const params = [body.movie_name];
-  
-//   db.query(sql, params, (err, result) => {
-//     if (err) {
-//       res.status(400).json({ error: err.message });
-//       return;
-//     }
-//     res.json({
-//       message: 'success',
-//       data: body
-//     });
-//   });
-// });
-
-// // Read all movies
-// app.get('/api/movies', (req, res) => {
-//   const sql = `SELECT id, movie_name AS title FROM movies`;
-  
-//   db.query(sql, (err, rows) => {
-//     if (err) {
-//       res.status(500).json({ error: err.message });
-//        return;
-//     }
-//     res.json({
-//       message: 'success',
-//       data: rows
-//     });
-//   });
-// });
-
-// // Delete a movie
-// app.delete('/api/movie/:id', (req, res) => {
-//   const sql = `DELETE FROM movies WHERE id = ?`;
-//   const params = [req.params.id];
-  
-//   db.query(sql, params, (err, result) => {
-//     if (err) {
-//       res.statusMessage(400).json({ error: res.message });
-//     } else if (!result.affectedRows) {
-//       res.json({
-//       message: 'Movie not found'
-//       });
-//     } else {
-//       res.json({
-//         message: 'deleted',
-//         changes: result.affectedRows,
-//         id: req.params.id
-//       });
-//     }
-//   });
-// });
-
-// // Read list of all reviews and associated movie name using LEFT JOIN
-// app.get('/api/movie-reviews', (req, res) => {
-//   const sql = `SELECT movies.movie_name AS movie, reviews.review FROM reviews LEFT JOIN movies ON reviews.movie_id = movies.id ORDER BY movies.movie_name;`;
-//   db.query(sql, (err, rows) => {
-//     if (err) {
-//       res.status(500).json({ error: err.message });
-//       return;
-//     }
-//     res.json({
-//       message: 'success',
-//       data: rows
-//     });
-//   });
-// });
-
-// // BONUS: Update review name
-// app.put('/api/review/:id', (req, res) => {
-//   const sql = `UPDATE reviews SET review = ? WHERE id = ?`;
-//   const params = [req.body.review, req.params.id];
-
-//   db.query(sql, params, (err, result) => {
-//     if (err) {
-//       res.status(400).json({ error: err.message });
-//     } else if (!result.affectedRows) {
-//       res.json({
-//         message: 'Movie not found'
-//       });
-//     } else {
-//       res.json({
-//         message: 'success',
-//         data: req.body,
-//         changes: result.affectedRows
-//       });
-//     }
-//   });
-// });
