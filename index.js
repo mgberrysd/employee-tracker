@@ -226,6 +226,16 @@ const inqPrompt = () => {
 
                             if (data.addManagerID === 'None') {
                                 managerID = null;
+                                const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+                                const params = [data.addFirstName, data.addLastName, roleID, managerID];
+                                db.query(sql, params, (err, rows) => {
+                                    if (err) {
+                                        console.error({ error: err.message });
+                                        return;
+                                    }
+                                    console.log(`Added new employee ${data.addFirstName} ${data.addLastName}`);
+                                    inqPrompt();
+                                });
                             }
                             else {
                                 const sqladdManagerID = `SELECT id FROM employee WHERE CONCAT_WS(" ", employee.first_name, employee.last_name) = '${data.addManagerID}'`;
@@ -235,19 +245,18 @@ const inqPrompt = () => {
                                         return;
                                     }
                                     managerID = rows[0].id;
+                                    const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+                                    const params = [data.addFirstName, data.addLastName, roleID, managerID];
+                                    db.query(sql, params, (err, rows) => {
+                                        if (err) {
+                                            console.error({ error: err.message });
+                                            return;
+                                        }
+                                        console.log(`Added new employee ${data.addFirstName} ${data.addLastName}`);
+                                        inqPrompt();
+                                    });
                                 })
                             };
-
-                            const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
-                            const params = [data.addFirstName, data.addLastName, roleID, managerID];
-                            db.query(sql, params, (err, rows) => {
-                                if (err) {
-                                    console.error({ error: err.message });
-                                    return;
-                                }
-                                console.log(`Added new employee ${data.addFirstName} ${data.addLastName}`);
-                                inqPrompt();
-                            });
                         });
                     });
             }
