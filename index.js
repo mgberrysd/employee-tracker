@@ -36,8 +36,7 @@ const inqPrompt = () => {
             }
 
             if (data.top === 'View all roles') {
-                const sql = `SELECT role.title, role.id AS role_id, department.name AS department, role.salary FROM role
-        JOIN department ON department.id = role.department_id`;
+                const sql = `SELECT role.title, role.id AS role_id, department.name AS department, role.salary FROM role JOIN department ON department.id = role.department_id`;
                 db.query(sql, (err, rows) => {
                     if (err) {
                         console.error({ error: err.message });
@@ -59,6 +58,11 @@ const inqPrompt = () => {
                         console.error({ error: err.message });
                         return;
                     }
+
+                    // const transformed = rows.reduce((acc, { employee_id, ...x }) => { acc[employee_id] = x; return acc }, {})
+
+                    // console.table(transformed);{columns: ['employee_id', 'first_name', 'last_name', 'title', 'department', 'salary', 'manager']}, 
+                    console.log(rows);
                     console.table(rows);
                     inqPrompt();
                 });
@@ -74,8 +78,7 @@ const inqPrompt = () => {
                         }
                     ])
                     .then((data) => {
-                        const sql = `INSERT INTO department (name)
-                VALUES (?)`;
+                        const sql = `INSERT INTO department (name) VALUES (?)`;
                         const params = [data.addDepartment];
                         db.query(sql, params, (err, rows) => {
                             if (err) {
@@ -128,8 +131,7 @@ const inqPrompt = () => {
                                 return;
                             }
                             console.log(rows);
-                            const sql = `INSERT INTO role (title, salary, department_id)
-                    VALUES (?, ?, ?)`;
+                            const sql = `INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)`;
                             const params = [data.addRoleTitle, data.addRoleSalary, rows[0].id];
                             db.query(sql, params, (err, rows) => {
                                 if (err) {
@@ -165,6 +167,7 @@ const inqPrompt = () => {
                     for (let i = 0; i < rows.length; i++) {
                         managers.push(rows[i].manager);
                     }
+                    managers.push('None')
                 });
                 inquirer
                     .prompt([
@@ -187,55 +190,125 @@ const inqPrompt = () => {
                         {
                             type: 'list',
                             name: 'addManagerID',
-                            message: 'Who is the manager of the employee you wish to add? (enter null if no manager)',
+                            message: 'Who is the manager of the employee you wish to add? (enter None if no manager)',
                             choices: managers,
                         },
                     ])
                     .then((data) => {
-
-
-
-
-                        const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id)
-                VALUES (?, ?, ?, ?)`;
-                        const params = [data.addFirstName, data.addLastName, data.addRoleID, JSON.parse(data.addManagerID)];
-                        db.query(sql, params, (err, rows) => {
+                        const sqladdRoleID = `SELECT id FROM role where role.title = '${data.addRoleID}'`;
+                        db.query(sqladdRoleID, (err, rows) => {
                             if (err) {
                                 console.error({ error: err.message });
                                 return;
                             }
-                            console.log(`Added new employee ${data.addFirstName} ${data.addLastName}`);
-                            inqPrompt();
+                            const roleID = rows[0].id;
+
+                            let managerID;
+
+                            if (data.addManagerID === 'None') {
+                                managerID = null;
+                            }
+                            else {
+                                const sqladdManagerID = `SELECT id FROM employee WHERE CONCAT_WS(" ", employee.first_name, employee.last_name) = '${data.addManagerID}'`;
+                                db.query(sqladdManagerID, (err, rows) => {
+                                    if (err) {
+                                        console.error({ error: err.message });
+                                        return;
+                                    }
+                                    managerID = rows[0].id;
+                                })
+                            };
+
+
+                            const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+                            const params = [data.addFirstName, data.addLastName, roleID, managerID];
+                            db.query(sql, params, (err, rows) => {
+                                if (err) {
+                                    console.error({ error: err.message });
+                                    return;
+                                }
+                                console.log(`Added new employee ${data.addFirstName} ${data.addLastName}`);
+                                inqPrompt();
+                            });
+
                         });
+
+
                     });
             }
 
             if (data.top === 'Update an employee role') {
-                inquirer
-                    .prompt([
-                        {
-                            type: 'input',
-                            name: 'selectID',
-                            message: 'What is the ID of the employee you wish to update?',
-                        },
-                        {
-                            type: 'input',
-                            name: 'updateRoleID',
-                            message: 'What is the new role ID of the employee you wish to update?',
-                        },
-                    ])
-                    .then((data) => {
-                        const sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
-                        const params = [data.updateRoleID, data.selectID];
-                        db.query(sql, params, (err, rows) => {
-                            if (err) {
-                                console.error({ error: err.message });
-                                return;
-                            }
-                            console.log(`Updated employee ${data.selectID} to role ID ${data.updateRoleID}`);
-                            inqPrompt();
+                const roles = [];
+                const sqlRoles = `SELECT title FROM role`;
+                db.query(sqlRoles, (err, rows) => {
+                    if (err) {
+                        console.error({ error: err.message });
+                        return;
+                    }
+                    for (let i = 0; i < rows.length; i++) {
+                        roles.push(rows[i].title);
+                    }
+                });
+
+                const employees = [];
+                const sqlEmployees = `SELECT CONCAT_WS(" ", employee.first_name, employee.last_name) AS name FROM employee`;
+                db.query(sqlEmployees, (err, rows) => {
+                    if (err) {
+                        console.error({ error: err.message });
+                        return;
+                    }
+                    for (let i = 0; i < rows.length; i++) {
+                        employees.push(rows[i]);
+                    }
+
+                    inquirer
+                        .prompt([
+                            {
+                                type: 'list',
+                                name: 'selectID',
+                                message: `Which employee's role do you wish to update?`,
+                                choices: employees,
+                            },
+                            {
+                                type: 'list',
+                                name: 'updateRoleID',
+                                message: 'What is the new role of this employee?',
+                                choices: roles,
+                            },
+                        ])
+                        .then((data) => {
+                            const sqladdEmployeeID = `SELECT id FROM employee WHERE CONCAT_WS(" ", employee.first_name, employee.last_name) = '${data.selectID}'`;
+                            db.query(sqladdEmployeeID, (err, rows) => {
+                                if (err) {
+                                    console.error({ error: err.message });
+                                    return;
+                                }
+                                const employeeID = rows[0].id;
+
+                                const sqladdRoleID = `SELECT id FROM role WHERE role.title = '${data.updateRoleID}'`;
+                                db.query(sqladdRoleID, (err, rows) => {
+                                    if (err) {
+                                        console.error({ error: err.message });
+                                        return;
+                                    }
+                                    console.log(rows)
+                                    const roleID = rows[0].id;
+
+                                    const sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
+                                    const params = [roleID, employeeID];
+                                    db.query(sql, params, (err, rows) => {
+                                        if (err) {
+                                            console.error({ error: err.message });
+                                            return;
+                                        }
+                                        console.log(`Updated employee ${data.selectID}'s role to ${data.updateRoleID}`);
+                                        inqPrompt();
+                                    });
+                                });
+                            });
                         });
-                    });
+
+                });
             }
 
             if (data.top === 'Quit') {
